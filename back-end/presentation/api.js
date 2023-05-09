@@ -1,5 +1,6 @@
 require('dotenv').config();
 const http = require('http');
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const app = express();
 var cors = require('cors');
@@ -43,13 +44,24 @@ app.post('/login', async (req, res) => {
         const user = await User.findOne({ email })
 
         if (user) {
-            if (bcrypt.compare(password, user.password)) {
-                console.log(`found user ${user.firstName}`);
-                res.send(user); 
-            }
+            bcrypt.compare(password, user.password, (err, resp) => {
+                if (err) {
+                    res.status(404).json({ error: 'something went wrong' });
+                }
+                if (resp) {
+                    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET)
+                    console.log(`found user ${user.firstName}`);
+                    res.status(200).json({
+                        email: user.email,
+                        accessToken: accessToken,
+                    });
+                } else {
+                    res.status(404).json({ error: 'password is incorrect' });
+                }
+            });
         } else {
             console.log('did not find user');
-            res.send({ error: 'did not find user' });
+            res.status(404).json({ error: 'did not find user' });
         }
     } catch (e) {
         res.send({ status: 'error', error: e.message });

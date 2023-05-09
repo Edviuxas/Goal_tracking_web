@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
@@ -9,19 +9,26 @@ import { loginUser } from '../services/api';
 
 function Login() {
 
+  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({});
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       // console.log({
       //     email: data.get('email'),
       //     password: data.get('password'),
       // });
-      loginUser({
+      const user = await loginUser({
         email: data.get('email'),
         password: data.get('password'),
-      }).then(receivedData => console.log(receivedData));
+      });
+      console.log(user);
+      if (!user.error) {
+        // setUserInfo(user);
+        // console.log(userInfo);
+        navigate('/goals', { state: user });
+      }
   };
 
   return (
