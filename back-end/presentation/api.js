@@ -15,6 +15,49 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const generateAccessToken = (user) => {
+    return jwt.sign({ id: user._id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "15m",
+    });
+};
+  
+const generateRefreshToken = (user) => {
+    return jwt.sign({ id: user._id, email: user.email }, process.env.REFRESH_TOKEN_SECRET);
+};
+
+app.post("/api/refresh", async (req, res) => {
+    //take the refresh token from the user
+    const refreshToken = req.body.refreshToken;
+    console.log(refreshToken);
+    const userId = req.body.id;
+  
+    //send error if there is no token or it's invalid
+    if (!refreshToken) return res.status(401).json("You are not authenticated!");
+    const dbUser = await User.findOne( {_id: userId} );
+    if (!dbUser)
+        return res.status(403).json("user not found in database");
+    if (!dbUser.jwtRefreshTokens.includes(refreshToken))
+        return res.status(403).json("Refresh token is not valid!");
+    
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
+      err && console.log(err);
+      dbUser.jwtRefreshTokens = dbUser.jwtRefreshTokens.filter((token) => token !== refreshToken);
+  
+      const newAccessToken = generateAccessToken(user);
+      const newRefreshToken = generateRefreshToken(user);
+  
+      dbUser.jwtRefreshTokens.push(newRefreshToken);
+      await dbUser.save();
+  
+      res.status(200).json({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
+    });
+  
+    //if everything is ok, create new access token, refresh token and send to user
+  });
+
 app.post('/register', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     try {
@@ -44,17 +87,22 @@ app.post('/login', async (req, res) => {
         const user = await User.findOne({ email })
 
         if (user) {
-            bcrypt.compare(password, user.password, (err, resp) => {
+            bcrypt.compare(password, user.password, async (err, resp) => {
                 if (err) {
                     res.status(404).json({ error: 'something went wrong' });
                 }
                 if (resp) {
-                    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET)
+                    const accessToken = generateAccessToken(user);
+                    const refreshToken = generateRefreshToken(user);
                     console.log(`found user ${user.firstName}`);
                     res.status(200).json({
+                        id: user._id,
                         email: user.email,
                         accessToken: accessToken,
+                        refreshToken: refreshToken,
                     });
+                    user.jwtRefreshTokens.push(refreshToken);
+                    await user.save();
                 } else {
                     res.status(404).json({ error: 'password is incorrect' });
                 }

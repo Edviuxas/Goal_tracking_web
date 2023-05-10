@@ -24,6 +24,7 @@ const UserSchema = new mongoose.Schema({
     lastName: {
         type: String,
         required: true,
-    }
+    },
+    jwtRefreshTokens: [String],
 });
 const User = mongoose.model('users', UserSchema);
