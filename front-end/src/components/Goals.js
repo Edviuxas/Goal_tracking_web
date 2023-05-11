@@ -15,6 +15,14 @@ const CreateGoalModal = styled(Modal)({
 })
 
 function Goals() {
+    const handleCreateGoal = (event) => {
+        event.preventDefault();
+        setCreateGoalModalOpen(false);
+        const goalData = new FormData(event.currentTarget);
+        console.log(goalData.get('name'));
+        console.log(goalData.get('finishBy'));
+        console.log(goalData.get('difficulty'));
+    };
     const { state } = useLocation();
     const [createGoalModalOpen, setCreateGoalModalOpen] = useState(false);
     const [goalsList, setGoalsList] = useState([]);
@@ -24,7 +32,7 @@ function Goals() {
     }, []);
     return (
         <>
-            {((goalsList.length !== 0) ? <div>goals list is not empty</div> : <div>goals list is empty</div>)}
+            {/* {((goalsList.length !== 0) ? <div>goals list is not empty</div> : <div>goals list is empty</div>)} */}
             <Tooltip
                 onClick={(e) => setCreateGoalModalOpen(true)}
                 title="Create new goal"
@@ -44,7 +52,15 @@ function Goals() {
                 open={createGoalModalOpen}
                 onClose={(e) => setCreateGoalModalOpen(false)}
             >
-                <Box m={1} p={2} borderRadius={5} bgcolor={"background.default"}>
+                <Box
+                    m={1}
+                    p={2}
+                    borderRadius={5}
+                    bgcolor={"background.default"}
+                    component="form"
+                    noValidate
+                    onSubmit={handleCreateGoal}
+                >
                     <Typography variant="h6" color="gray" textAlign="center">
                         Create new goal
                     </Typography>
@@ -59,13 +75,17 @@ function Goals() {
                                 size='small'
                                 required
                                 label="Name"
+                                name="name"
                                 id="name"
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker label="Finish by" slotProps={{ textField: { size: 'small', fullWidth: true } }}/>
-                            </LocalizationProvider>
+                            <TextField
+                                fullWidth
+                                type="date"
+                                name="finishBy"
+                                size="small"
+                            />
                         </Grid>                        
                     </Grid>
                     <Box p={2}>
@@ -74,6 +94,7 @@ function Goals() {
                         </Typography>
                         <Slider
                             id="difficulty"
+                            name="difficulty"
                             defaultValue={1}
                             step={1}
                             min={1}
@@ -86,6 +107,7 @@ function Goals() {
                         sx={{ display: 'flex', justifyContent: 'flex-end' }}
                     >
                         <Button
+                            type='submit'
                             variant='contained'
                             justifyContent='center'
                             alignItems='center'
