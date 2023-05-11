@@ -28,7 +28,6 @@ const generateRefreshToken = (user) => {
 app.post("/api/refresh", async (req, res) => {
     //take the refresh token from the user
     const refreshToken = req.body.refreshToken;
-    console.log(refreshToken);
     const userId = req.body.id;
   
     //send error if there is no token or it's invalid
