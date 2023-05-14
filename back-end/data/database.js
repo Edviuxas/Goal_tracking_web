@@ -27,4 +27,25 @@ const UserSchema = new mongoose.Schema({
     },
     jwtRefreshTokens: [String],
 });
+
+const GoalSchema = new mongoose.Schema({
+    createdBy: {
+        type: String,
+        required: true,
+    },
+    goalName: {
+        type: String,
+        required: true,
+    },
+    finishBy: {
+        type: Date,
+        required: true,
+    },
+    difficulty: {
+        type: Number,
+        required: true,
+    }
+});
+
+const Goal = mongoose.model('goals', GoalSchema);
 const User = mongoose.model('users', UserSchema);

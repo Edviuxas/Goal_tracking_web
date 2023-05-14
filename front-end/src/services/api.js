@@ -26,13 +26,20 @@ export const loginUser = (userInfo) => {
         "Accept": "application/json",
     };
     return axios.post('http://localhost:8080/login', userInfo, { headers }).then(res => res.data);
-    // axios({
-    //     method: 'post',
-    //     url: 'http://localhost:8080/login',
-    //     headers: {
-    //         "Content-Type": "application/json",
-    //         "Accept": "application/json",
-    //     },
-    //     data: userInfo,
-    // }).then(data => console.log(data));
+};
+
+export const createGoal = (goalInfo) => {
+    const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    };
+    return axios.post('http://localhost:8080/goal', goalInfo, { headers }).then(res => res.data);
+};
+
+export const getGoals = (userInfo) => {
+    const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    };
+    return axios.post('http://localhost:8080/goals', userInfo, { headers }).then(res => res.data);
 };

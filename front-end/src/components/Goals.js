@@ -6,6 +6,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Add } from '@mui/icons-material';
 import styled from '@emotion/styled';
+import { createGoal, getGoals } from '../services/api';
+import dayjs from 'dayjs';
+import Goal from './Goal';
 
 const CreateGoalModal = styled(Modal)({
     // margin: 1,
@@ -15,24 +18,34 @@ const CreateGoalModal = styled(Modal)({
 })
 
 function Goals() {
-    const handleCreateGoal = (event) => {
-        event.preventDefault();
-        setCreateGoalModalOpen(false);
-        const goalData = new FormData(event.currentTarget);
-        console.log(goalData.get('name'));
-        console.log(goalData.get('finishBy'));
-        console.log(goalData.get('difficulty'));
-    };
     const { state } = useLocation();
     const [createGoalModalOpen, setCreateGoalModalOpen] = useState(false);
     const [goalsList, setGoalsList] = useState([]);
 
+    const handleCreateGoal = (event) => {
+        event.preventDefault();
+        setCreateGoalModalOpen(false);
+        const goalData = new FormData(event.currentTarget);
+        const createdGoal = {createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty')};
+        createGoal(createdGoal);
+        setGoalsList([...goalsList, createdGoal]);
+        // console.log(goalsList);
+        // console.log(goalData.get('name'));
+        // console.log(goalData.get('finishBy'));
+        // console.log(goalData.get('difficulty'));
+    };
+
     useEffect(() => {
-        // setGoalsList([{goalName: 'lalal'}])
+        getGoals(state).then(receivedGoals => setGoalsList(...goalsList, receivedGoals));
     }, []);
+
+    useEffect(() => {
+        console.log(goalsList);
+    }, [goalsList])
+    
     return (
         <>
-            {/* {((goalsList.length !== 0) ? <div>goals list is not empty</div> : <div>goals list is empty</div>)} */}
+            {goalsList.map((goal) => (<Goal goalInfo={goal}/>))}
             <Tooltip
                 onClick={(e) => setCreateGoalModalOpen(true)}
                 title="Create new goal"
@@ -85,6 +98,7 @@ function Goals() {
                                 type="date"
                                 name="finishBy"
                                 size="small"
+                                InputProps={{inputProps: { min: dayjs().format('YYYY-MM-DD')}}}
                             />
                         </Grid>                        
                     </Grid>

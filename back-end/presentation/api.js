@@ -10,6 +10,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 require('../data/database');
 
+const Goal = mongoose.model('goals');
 const User = mongoose.model('users');
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -110,6 +111,35 @@ app.post('/login', async (req, res) => {
             console.log('did not find user');
             res.status(404).json({ error: 'did not find user' });
         }
+    } catch (e) {
+        res.send({ status: 'error', error: e.message });
+    }
+});
+
+app.post('/goal', async (req, res) => {
+    const { createdBy, goalName, finishBy, difficulty } = req.body;
+    try {
+        await Goal.create({
+            createdBy,
+            goalName,
+            finishBy,
+            difficulty
+        });
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        console.log(e.message);
+        res.send({ status: 'error', error: e.message });
+    }
+});
+
+app.post('/goals', async (req, res) => {
+    const userId = req.body.id;
+    // console.log(`userId: ${userId}`);
+    try {
+        const goalsList = await Goal.find({ createdBy: userId });
+        console.log('goals list:');
+        console.log(goalsList);
+        res.status(200).json(goalsList);        
     } catch (e) {
         res.send({ status: 'error', error: e.message });
     }
