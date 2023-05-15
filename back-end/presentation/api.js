@@ -117,9 +117,10 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/goal', async (req, res) => {
-    const { createdBy, goalName, finishBy, difficulty } = req.body;
+    const { id, createdBy, goalName, finishBy, difficulty } = req.body;
     try {
         await Goal.create({
+            id,
             createdBy,
             goalName,
             finishBy,
@@ -132,11 +133,21 @@ app.post('/goal', async (req, res) => {
     }
 });
 
-app.post('/goals', async (req, res) => {
-    const userId = req.body.id;
+app.delete('/goal/:id', async (req, res) => {
+    const goalId = req.params.id;
+    try {
+        await Goal.deleteOne({ id: goalId });
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        res.send({ status: 'error', error: e.message});
+    }
+});
+
+app.get('/goals', async (req, res) => {
+    // const userId = req.body.id;
     // console.log(`userId: ${userId}`);
     try {
-        const goalsList = await Goal.find({ createdBy: userId });
+        const goalsList = await Goal.find({});
         console.log('goals list:');
         console.log(goalsList);
         res.status(200).json(goalsList);        

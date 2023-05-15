@@ -1,7 +1,5 @@
-import { Fab, Tooltip, Modal, Box, Typography, Slider, Input, TextField, Button, Grid, Container } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Fab, Tooltip, Modal, Box, Typography, Slider, Input, TextField, Button, Grid, Container, Stack } from '@mui/material';
+import { v4 as uuid } from 'uuid';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Add } from '@mui/icons-material';
@@ -26,7 +24,7 @@ function Goals() {
         event.preventDefault();
         setCreateGoalModalOpen(false);
         const goalData = new FormData(event.currentTarget);
-        const createdGoal = {createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty')};
+        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty')};
         createGoal(createdGoal);
         setGoalsList([...goalsList, createdGoal]);
         // console.log(goalsList);
@@ -40,12 +38,14 @@ function Goals() {
     }, []);
 
     useEffect(() => {
-        console.log(goalsList);
+        // console.log(goalsList);
     }, [goalsList])
     
     return (
         <>
-            {goalsList.map((goal) => (<Goal goalInfo={goal}/>))}
+            <Stack direction="row">
+                {goalsList.map((goal) => (<Goal key={goal.id} goalInfo={goal} goalsList={goalsList} setGoalsList={setGoalsList}/>))}
+            </Stack>
             <Tooltip
                 onClick={(e) => setCreateGoalModalOpen(true)}
                 title="Create new goal"

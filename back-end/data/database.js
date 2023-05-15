@@ -29,6 +29,11 @@ const UserSchema = new mongoose.Schema({
 });
 
 const GoalSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     createdBy: {
         type: String,
         required: true,
