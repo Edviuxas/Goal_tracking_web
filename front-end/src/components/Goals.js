@@ -1,22 +1,20 @@
-import { Fab, Tooltip, Modal, Box, Typography, Slider, TextField, Button, Grid, Stack, AppBar, Toolbar, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Fab, Tooltip, Typography, Stack, AppBar, Toolbar } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Add } from '@mui/icons-material';
-import styled from '@emotion/styled';
 import { createGoal, getGoals } from '../services/api';
-import dayjs from 'dayjs';
-import Goal from './Goal';
-import ResponsiblePeopleInput from './ResponsiblePeopleInput';
+import GoalCard from './GoalCard';
 
-const CreateGoalModal = styled(Modal)({
-    // margin: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-})
+// const CreateGoalModal = styled(Modal)({
+//     // margin: 1,
+//     display: "flex",
+//     alignItems: "center",
+//     justifyContent: "center"
+// })
 
 function Goals() {
+    const navigate = useNavigate();
     const { state } = useLocation();
     const [createGoalModalOpen, setCreateGoalModalOpen] = useState(false);
     const [goalsList, setGoalsList] = useState([]);
@@ -37,17 +35,19 @@ function Goals() {
         // console.log(goalData.get('goalType'));
     };
 
-    const handleGoalTypeChange = (event, newType) => {
-        setGoalType(newType);
-    }
+    // const handleGoalTypeChange = (event, newType) => {
+    //     setGoalType(newType);
+    // }
 
     useEffect(() => {
         getGoals(state).then(receivedGoals => setGoalsList(...goalsList, receivedGoals));
+        // console.log('shown');
     }, []);
 
-    // useEffect(() => {
-    //     console.log(goalsList);
-    // }, [goalsList])
+    useEffect(() => {
+        console.log('goalsList');
+        console.log(goalsList);
+    }, [goalsList])
     
     return (
         <>
@@ -67,10 +67,10 @@ function Goals() {
                 </Toolbar>
             </AppBar>
             <Stack direction="row" flexWrap="wrap">
-                {goalsList.map((goal) => (<Goal key={goal.id} goalInfo={goal} goalsList={goalsList} setGoalsList={setGoalsList}/>))}
+                {goalsList.map((goal) => (<GoalCard key={goal.id} goalInfo={goal} goalsList={goalsList} setGoalsList={setGoalsList}/>))}
             </Stack>
             <Tooltip
-                onClick={(e) => setCreateGoalModalOpen(true)}
+                onClick={(e) => navigate('/createGoal', { state: state })}
                 title="Create new goal"
                 sx={{
                     position: "fixed",
@@ -84,13 +84,13 @@ function Goals() {
                     </Add>
                 </Fab>
             </Tooltip>
-            <CreateGoalModal
+            {/* <CreateGoalModal
                 open={createGoalModalOpen}
                 onClose={(e) => setCreateGoalModalOpen(false)}
             >
                 <Box
                     m={1}
-                    p={2}
+                    p={3}
                     borderRadius={5}
                     bgcolor={"background.default"}
                     component="form"
@@ -166,7 +166,7 @@ function Goals() {
                         </Button>
                     </Box>
                 </Box>
-            </CreateGoalModal>
+            </CreateGoalModal> */}
         </>
     )
 }
