@@ -1,4 +1,4 @@
-import { Fab, Tooltip, Modal, Box, Typography, Slider, Input, TextField, Button, Grid, Container, Stack } from '@mui/material';
+import { Fab, Tooltip, Modal, Box, Typography, Slider, TextField, Button, Grid, Stack, AppBar, Toolbar, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -7,6 +7,7 @@ import styled from '@emotion/styled';
 import { createGoal, getGoals } from '../services/api';
 import dayjs from 'dayjs';
 import Goal from './Goal';
+import ResponsiblePeopleInput from './ResponsiblePeopleInput';
 
 const CreateGoalModal = styled(Modal)({
     // margin: 1,
@@ -19,31 +20,53 @@ function Goals() {
     const { state } = useLocation();
     const [createGoalModalOpen, setCreateGoalModalOpen] = useState(false);
     const [goalsList, setGoalsList] = useState([]);
+    const [goalType, setGoalType] = useState('');
 
     const handleCreateGoal = (event) => {
         event.preventDefault();
         setCreateGoalModalOpen(false);
         const goalData = new FormData(event.currentTarget);
-        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty')};
+        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType};
         createGoal(createdGoal);
         setGoalsList([...goalsList, createdGoal]);
+        setGoalType('');
         // console.log(goalsList);
         // console.log(goalData.get('name'));
         // console.log(goalData.get('finishBy'));
         // console.log(goalData.get('difficulty'));
+        // console.log(goalData.get('goalType'));
     };
+
+    const handleGoalTypeChange = (event, newType) => {
+        setGoalType(newType);
+    }
 
     useEffect(() => {
         getGoals(state).then(receivedGoals => setGoalsList(...goalsList, receivedGoals));
     }, []);
 
-    useEffect(() => {
-        // console.log(goalsList);
-    }, [goalsList])
+    // useEffect(() => {
+    //     console.log(goalsList);
+    // }, [goalsList])
     
     return (
         <>
-            <Stack direction="row">
+            <AppBar position='static'>
+                <Toolbar>
+                    <Typography
+                        variant='h6'
+                    >
+                        GOALS
+                    </Typography>
+                    <Typography
+                        variant='h6'
+                        marginLeft={5}
+                    >
+                        TEAMS
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <Stack direction="row" flexWrap="wrap">
                 {goalsList.map((goal) => (<Goal key={goal.id} goalInfo={goal} goalsList={goalsList} setGoalsList={setGoalsList}/>))}
             </Stack>
             <Tooltip
@@ -80,7 +103,8 @@ function Goals() {
                     <Grid
                         container
                         spacing={0.5}
-                        p={3}
+                        mb={2}
+                        mt={2}
                     >
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -102,7 +126,19 @@ function Goals() {
                             />
                         </Grid>                        
                     </Grid>
-                    <Box p={2}>
+                    <ToggleButtonGroup
+                        name='goalType'
+                        color='primary'
+                        exclusive
+                        value={goalType}
+                        onChange={handleGoalTypeChange}
+                        sx={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}
+                    >
+                        <ToggleButton value="Personal goal">Personal goal</ToggleButton>
+                        <ToggleButton value="Team goal">Team goal</ToggleButton>
+                    </ToggleButtonGroup>
+                    <ResponsiblePeopleInput/>
+                    <Box pt={2} pb={2}>
                         <Typography variant="h7" gutterBottom>
                             Difficulty
                         </Typography>

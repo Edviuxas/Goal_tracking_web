@@ -117,14 +117,15 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/goal', async (req, res) => {
-    const { id, createdBy, goalName, finishBy, difficulty } = req.body;
+    const { id, createdBy, goalName, finishBy, difficulty, goalType } = req.body;
     try {
         await Goal.create({
             id,
             createdBy,
             goalName,
             finishBy,
-            difficulty
+            difficulty,
+            goalType,
         });
         res.status(200).json({ status: 'ok' });
     } catch (e) {

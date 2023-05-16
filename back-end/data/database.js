@@ -43,11 +43,15 @@ const GoalSchema = new mongoose.Schema({
         required: true,
     },
     finishBy: {
-        type: Date,
+        type: String,
         required: true,
     },
     difficulty: {
         type: Number,
+        required: true,
+    },
+    goalType: {
+        type: String,
         required: true,
     }
 });
