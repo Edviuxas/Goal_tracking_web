@@ -1,7 +1,7 @@
 import { Box, Typography, Slider, TextField, Button, Grid, ToggleButtonGroup, ToggleButton, Stack, Divider } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { v4 as uuid } from 'uuid';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createGoal } from '../services/api';
 import dayjs from 'dayjs';
@@ -9,11 +9,9 @@ import ResponsiblePeopleInput from './ResponsiblePeopleInput';
 import OkrTable from './OkrTable';
 
 function GoalCreation() {
-    const okrTableColumns = [
-        { field: 'okrName', headerName: 'Name' },
-        { field: 'okrFinishBy', headerName: 'Due date' },
-        { field: 'okrDifficulty', headerName: 'Difficulty'}
-    ];
+    const okrGoalNameRef = useRef(null);
+    const okrFinishByRef = useRef(null);
+    // const okrDifficultyRef = useRef(null);
     const navigate = useNavigate();
     const [goalType, setGoalType] = useState('');
     const [okrGoalsList, setOkrGoalsList] = useState([]);
@@ -25,28 +23,19 @@ function GoalCreation() {
     const handleCreateGoal = (event) => {
         event.preventDefault();
         const goalData = new FormData(event.currentTarget);
-        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType};
+        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType, okrGoals: okrGoalsList};
         createGoal(createdGoal);
-        // state.setGoalsList([...state.goalsList, createdGoal]);
-        // setGoalType('');
         navigate(-1);
-        // console.log(goalsList);
-        // console.log(goalData.get('name'));
-        // console.log(goalData.get('finishBy'));
-        // console.log(goalData.get('difficulty'));
-        // console.log(goalData.get('goalType'));
     };
 
     const handleAddOkrGoal = (event) => {
         event.preventDefault();
         const okrGoalData = new FormData(event.currentTarget);
         setOkrGoalsList([...okrGoalsList, {id: uuid(), okrName: okrGoalData.get('okrName'), okrFinishBy: okrGoalData.get('okrFinishBy'), okrDifficulty: okrGoalData.get('okrDifficulty')}])
-        // console.log({okrName: okrGoalData.get('okrName'), okrFinishBy: okrGoalData.get('okrFinishBy'), okrDifficulty: okrGoalData.get('okrDifficulty')});
+        okrGoalNameRef.current.value = '';
+        okrFinishByRef.current.value = '';
+        // okrDifficultyRef.current.value = 1;
     };
-
-    // useEffect(() => {
-    //     console.log(okrGoalsList);
-    // }, [okrGoalsList])
 
   return (
     <Stack
@@ -102,7 +91,7 @@ function GoalCreation() {
                 <ToggleButton value="Personal goal">Personal goal</ToggleButton>
                 <ToggleButton value="Team goal">Team goal</ToggleButton>
             </ToggleButtonGroup>
-            <ResponsiblePeopleInput/>
+            <ResponsiblePeopleInput userInfo={state}/>
             <Box mt={2}>
                 <OkrTable okrGoalsList={okrGoalsList} setOkrGoalsList={setOkrGoalsList}/>
             </Box>
@@ -150,6 +139,7 @@ function GoalCreation() {
             >
                 <Grid item xs={12} sm={6}>
                     <TextField
+                        inputRef={okrGoalNameRef}
                         fullWidth
                         size='small'
                         required
@@ -160,6 +150,7 @@ function GoalCreation() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <TextField
+                        inputRef={okrFinishByRef}
                         fullWidth
                         type="date"
                         name="okrFinishBy"

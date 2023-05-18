@@ -5,7 +5,6 @@ const express = require('express');
 const app = express();
 var cors = require('cors');
 const bodyParser = require('body-parser');
-const goalTracking = require('../data/GoalTracking');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 require('../data/database');
@@ -18,7 +17,7 @@ app.use(bodyParser.json());
 
 const generateAccessToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "15m",
+        expiresIn: "15s",
     });
 };
   
@@ -26,27 +25,28 @@ const generateRefreshToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.REFRESH_TOKEN_SECRET);
 };
 
-app.post("/api/refresh", async (req, res) => {
+app.post("/api/refreshToken", async (req, res) => {
     //take the refresh token from the user
     const refreshToken = req.body.refreshToken;
     const userId = req.body.id;
+    console.log(`refresh token: ${refreshToken}`);
+    console.log(`userId: ${userId}`);
   
     //send error if there is no token or it's invalid
     if (!refreshToken) return res.status(401).json("You are not authenticated!");
     const dbUser = await User.findOne( {_id: userId} );
     if (!dbUser)
         return res.status(403).json("user not found in database");
-    if (!dbUser.jwtRefreshTokens.includes(refreshToken))
+    if (dbUser.refreshToken !== refreshToken)
         return res.status(403).json("Refresh token is not valid!");
     
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
       err && console.log(err);
-      dbUser.jwtRefreshTokens = dbUser.jwtRefreshTokens.filter((token) => token !== refreshToken);
   
-      const newAccessToken = generateAccessToken(user);
-      const newRefreshToken = generateRefreshToken(user);
+      const newAccessToken = generateAccessToken(dbUser);
+      const newRefreshToken = generateRefreshToken(dbUser);
   
-      dbUser.jwtRefreshTokens.push(newRefreshToken);
+      dbUser.jwtRefreshToken = newRefreshToken;
       await dbUser.save();
   
       res.status(200).json({
@@ -82,8 +82,6 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        // const encryptedPassword = await bcrypt.hash(password, 10);
-        // console.log(encryptedPassword);
         const user = await User.findOne({ email })
 
         if (user) {
@@ -94,14 +92,13 @@ app.post('/login', async (req, res) => {
                 if (resp) {
                     const accessToken = generateAccessToken(user);
                     const refreshToken = generateRefreshToken(user);
-                    console.log(`found user ${user.firstName}`);
                     res.status(200).json({
                         id: user._id,
                         email: user.email,
                         accessToken: accessToken,
                         refreshToken: refreshToken,
                     });
-                    user.jwtRefreshTokens.push(refreshToken);
+                    user.refreshToken = refreshToken;
                     await user.save();
                 } else {
                     res.status(404).json({ error: 'password is incorrect' });
@@ -116,8 +113,29 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.get('/users', async (req, res) => {
+    try {
+        const allUsers = await User.find({});
+        res.status(200).json(allUsers);
+    } catch (e) {
+        res.send({ status: 'error', error: e.message });
+    }
+});
+
+app.get('/user/:id', async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.findOne({ _id: userId });
+        console.log('user');
+        console.log(user);
+        res.status(200).json(user);
+    } catch (e) {
+        res.send({ status: 'error', error: e.message });
+    }
+});
+
 app.post('/goal', async (req, res) => {
-    const { id, createdBy, goalName, finishBy, difficulty, goalType } = req.body;
+    const { id, createdBy, goalName, finishBy, difficulty, goalType, okrGoals } = req.body;
     try {
         await Goal.create({
             id,
@@ -126,6 +144,7 @@ app.post('/goal', async (req, res) => {
             finishBy,
             difficulty,
             goalType,
+            okrGoals,
         });
         res.status(200).json({ status: 'ok' });
     } catch (e) {
@@ -149,8 +168,6 @@ app.get('/goals', async (req, res) => {
     // console.log(`userId: ${userId}`);
     try {
         const goalsList = await Goal.find({});
-        console.log('goals list:');
-        console.log(goalsList);
         res.status(200).json(goalsList);        
     } catch (e) {
         res.send({ status: 'error', error: e.message });

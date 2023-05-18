@@ -25,8 +25,28 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    jwtRefreshTokens: [String],
+    refreshToken: String,
 });
+
+const OkrGoalSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    okrName: {
+        type: String,
+        required: true,
+    },
+    okrFinishBy: {
+        type: String,
+        required: true,
+    },
+    okrDifficulty: {
+        type: String,
+        required: true,
+    },
+})
 
 const GoalSchema = new mongoose.Schema({
     id: {
@@ -53,7 +73,8 @@ const GoalSchema = new mongoose.Schema({
     goalType: {
         type: String,
         required: true,
-    }
+    },
+    okrGoals: [OkrGoalSchema],
 });
 
 const Goal = mongoose.model('goals', GoalSchema);

@@ -8,18 +8,6 @@ export const registerUser = (userInfo) => {
     return axios.post('http://localhost:8080/register', userInfo, { headers }).then(res => res.data);
 }
 
-// exports.loginUser = (userInfo) => {
-//     return fetch(`http://localhost:8080/login`, {
-//         method: 'POST',
-//         headers: {
-//             "Content-Type": "application/json",
-//             "Accept": "application/json",
-//         },
-//         body: JSON.stringify(userInfo)
-//     })
-//     .then(res => res.json())
-// }
-
 export const loginUser = (userInfo) => {
     const headers = {
         "Content-Type": "application/json",
@@ -46,9 +34,22 @@ export const getGoals = async (userInfo) => {
 };
 
 export const deleteGoal = async (goalId) => {
+    return axios.delete(`http://localhost:8080/goal/${goalId}`).then(res => res.data);
+}
+
+export const getAllUsers = async (userInfo) => {
     const headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
-    return axios.delete(`http://localhost:8080/goal/${goalId}`).then(res => res.data);
+    const allUsers = await axios.get('http://localhost:8080/users', { headers }).then(res => res.data);
+    return allUsers.filter(user => user._id !== userInfo.id);
+}
+
+export const getUser = async (userId) => {
+    return axios.get(`http://localhost:8080/user/${userId}`).then(res => res.data);
+}
+
+export const refreshToken = async (userInfo) => {
+    return axios.post('http://localhost:8080/api/refreshToken', {refreshToken: userInfo.refreshToken, id: userInfo._id}).then(res => res.data);
 }

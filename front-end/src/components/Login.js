@@ -25,6 +25,7 @@ function Login() {
       });
       console.log(user);
       if (!user.error) {
+        localStorage.setItem('JWT', JSON.stringify(user.accessToken));
         // setUserInfo(user);
         // console.log(userInfo);
         navigate('/goals', { state: user });
