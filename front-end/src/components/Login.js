@@ -26,9 +26,10 @@ function Login() {
       console.log(user);
       if (!user.error) {
         localStorage.setItem('JWT', JSON.stringify(user.accessToken));
+        sessionStorage.setItem('user', JSON.stringify(user));
         // setUserInfo(user);
         // console.log(userInfo);
-        navigate('/goals', { state: user });
+        navigate('/goals');
       }
   };
 

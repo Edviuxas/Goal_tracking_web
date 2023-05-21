@@ -25,12 +25,30 @@ const generateRefreshToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.REFRESH_TOKEN_SECRET);
 };
 
+const verify = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(" ")[1];
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json("Token is not valid from verify function");
+        }
+
+        req.user = user;
+        next();
+        });
+    } else {
+        res.status(401).json("You are not authenticated from verify function");
+    }
+};
+
 app.post("/api/refreshToken", async (req, res) => {
     //take the refresh token from the user
     const refreshToken = req.body.refreshToken;
     const userId = req.body.id;
-    console.log(`refresh token: ${refreshToken}`);
-    console.log(`userId: ${userId}`);
+    // console.log(`refresh token: ${refreshToken}`);
+    // console.log(`userId: ${userId}`);
   
     //send error if there is no token or it's invalid
     if (!refreshToken) return res.status(401).json("You are not authenticated!");
@@ -41,18 +59,19 @@ app.post("/api/refreshToken", async (req, res) => {
         return res.status(403).json("Refresh token is not valid!");
     
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
-      err && console.log(err);
-  
-      const newAccessToken = generateAccessToken(dbUser);
-      const newRefreshToken = generateRefreshToken(dbUser);
-  
-      dbUser.jwtRefreshToken = newRefreshToken;
-      await dbUser.save();
-  
-      res.status(200).json({
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      });
+        console.log('refreshing token from back end');
+        err && console.log(err);
+    
+        const newAccessToken = generateAccessToken(dbUser);
+        const newRefreshToken = generateRefreshToken(dbUser);
+    
+        dbUser.refreshToken = newRefreshToken;
+        await dbUser.save();
+    
+        res.status(200).json({
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+        });
     });
   
     //if everything is ok, create new access token, refresh token and send to user
@@ -113,7 +132,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/users', async (req, res) => {
+app.get('/users', verify, async (req, res) => {
     try {
         const allUsers = await User.find({});
         res.status(200).json(allUsers);
@@ -126,15 +145,15 @@ app.get('/user/:id', async (req, res) => {
     const userId = req.params.id;
     try {
         const user = await User.findOne({ _id: userId });
-        console.log('user');
-        console.log(user);
-        res.status(200).json(user);
+        // console.log('user');
+        // console.log(user);
+        res.status(200).json({ id: user._id, email: user.email, refreshToken: user.refreshToken });
     } catch (e) {
         res.send({ status: 'error', error: e.message });
     }
 });
 
-app.post('/goal', async (req, res) => {
+app.post('/goal', verify, async (req, res) => {
     const { id, createdBy, goalName, finishBy, difficulty, goalType, okrGoals } = req.body;
     try {
         await Goal.create({
@@ -153,7 +172,7 @@ app.post('/goal', async (req, res) => {
     }
 });
 
-app.delete('/goal/:id', async (req, res) => {
+app.delete('/goal/:id', verify, async (req, res) => {
     const goalId = req.params.id;
     try {
         await Goal.deleteOne({ id: goalId });
@@ -163,7 +182,7 @@ app.delete('/goal/:id', async (req, res) => {
     }
 });
 
-app.get('/goals', async (req, res) => {
+app.get('/goals', verify, async (req, res) => {
     // const userId = req.body.id;
     // console.log(`userId: ${userId}`);
     try {

@@ -1,4 +1,38 @@
 import axios from 'axios';
+import jwt_decode from "jwt-decode";
+
+const axiosJWT = axios.create();
+axiosJWT.interceptors.request.use(
+    async (config) => {
+        const currentUser = JSON.parse(sessionStorage.getItem('user'));
+        // console.log('config:')
+        // console.log(config);
+        let currentDate = new Date();
+        const decodedToken = jwt_decode(localStorage.getItem('JWT'));
+        if (decodedToken.exp * 1000 < currentDate.getTime()) {
+            console.log('refreshing token from api.js');
+            console.log(currentUser);
+            const data = await refreshToken(currentUser).then(data => data.data);
+            // console.log('data after refreshing');
+            // console.log(data);
+            config.headers["authorization"] = "Bearer " + data.accessToken;
+            sessionStorage.setItem('user', JSON.stringify({
+                ...currentUser,
+                accessToken: data.accessToken,
+                refreshToken: data.refreshToken
+            }));
+            localStorage.setItem('JWT', data.accessToken);
+        } else {
+            config.headers["authorization"] = "Bearer " + currentUser.accessToken;
+        }
+        console.log('config:')
+        console.log(config);
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export const registerUser = (userInfo) => {
     const headers = {
@@ -21,20 +55,24 @@ export const createGoal = (goalInfo) => {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
-    return axios.post('http://localhost:8080/goal', goalInfo, { headers }).then(res => res.data);
+    return axiosJWT.post('http://localhost:8080/goal', goalInfo, { headers }).then(res => res.data);
 };
 
-export const getGoals = async (userInfo) => {
+export const getGoals = async () => {
+    const currentUser = JSON.parse(sessionStorage.getItem('user'));
+    // console.log('current user from get goals');
+    // console.log(currentUser);
     const headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
-    const allGoals = await axios.get('http://localhost:8080/goals', { headers }).then(res => res.data);
-    return allGoals.filter(goal => goal.createdBy === userInfo.id);
+    const allGoals = await axiosJWT.get('http://localhost:8080/goals', { headers }).then(res => res.data);
+    // console.log(allGoals);
+    return allGoals.filter(goal => goal.createdBy === currentUser.id);
 };
 
 export const deleteGoal = async (goalId) => {
-    return axios.delete(`http://localhost:8080/goal/${goalId}`).then(res => res.data);
+    return axiosJWT.delete(`http://localhost:8080/goal/${goalId}`).then(res => res.data);
 }
 
 export const getAllUsers = async (userInfo) => {
@@ -42,7 +80,7 @@ export const getAllUsers = async (userInfo) => {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
-    const allUsers = await axios.get('http://localhost:8080/users', { headers }).then(res => res.data);
+    const allUsers = await axiosJWT.get('http://localhost:8080/users', { headers }).then(res => res.data);
     return allUsers.filter(user => user._id !== userInfo.id);
 }
 
@@ -51,5 +89,5 @@ export const getUser = async (userId) => {
 }
 
 export const refreshToken = async (userInfo) => {
-    return axios.post('http://localhost:8080/api/refreshToken', {refreshToken: userInfo.refreshToken, id: userInfo._id}).then(res => res.data);
+    return axios.post('http://localhost:8080/api/refreshToken', {refreshToken: userInfo.refreshToken, id: userInfo.id});
 }

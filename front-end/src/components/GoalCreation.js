@@ -9,13 +9,13 @@ import ResponsiblePeopleInput from './ResponsiblePeopleInput';
 import OkrTable from './OkrTable';
 
 function GoalCreation() {
+    const user = JSON.parse(sessionStorage.getItem('user'));
     const okrGoalNameRef = useRef(null);
     const okrFinishByRef = useRef(null);
     // const okrDifficultyRef = useRef(null);
     const navigate = useNavigate();
     const [goalType, setGoalType] = useState('');
     const [okrGoalsList, setOkrGoalsList] = useState([]);
-    const { state } = useLocation();
     const handleGoalTypeChange = (event, newType) => {
         setGoalType(newType);
     }
@@ -23,7 +23,9 @@ function GoalCreation() {
     const handleCreateGoal = (event) => {
         event.preventDefault();
         const goalData = new FormData(event.currentTarget);
-        const createdGoal = {id: uuid(), createdBy: state.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType, okrGoals: okrGoalsList};
+        const createdGoal = {id: uuid(), createdBy: user.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType, okrGoals: okrGoalsList};
+        console.log('created goal');
+        console.log(createdGoal);
         createGoal(createdGoal);
         navigate(-1);
     };
@@ -91,7 +93,7 @@ function GoalCreation() {
                 <ToggleButton value="Personal goal">Personal goal</ToggleButton>
                 <ToggleButton value="Team goal">Team goal</ToggleButton>
             </ToggleButtonGroup>
-            <ResponsiblePeopleInput userInfo={state}/>
+            <ResponsiblePeopleInput userInfo={user}/>
             <Box mt={2}>
                 <OkrTable okrGoalsList={okrGoalsList} setOkrGoalsList={setOkrGoalsList}/>
             </Box>
