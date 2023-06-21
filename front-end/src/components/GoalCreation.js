@@ -23,7 +23,7 @@ function GoalCreation() {
     const handleCreateGoal = (event) => {
         event.preventDefault();
         const goalData = new FormData(event.currentTarget);
-        const createdGoal = {id: uuid(), createdBy: user.id, goalName: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), 'goalType': goalType, okrGoals: okrGoalsList};
+        const createdGoal = {createdBy: user.id, name: goalData.get('name'), finishBy: goalData.get('finishBy'), difficulty: goalData.get('difficulty'), type: goalType, okrGoals: okrGoalsList};
         console.log('created goal');
         console.log(createdGoal);
         createGoal(createdGoal);
@@ -33,7 +33,7 @@ function GoalCreation() {
     const handleAddOkrGoal = (event) => {
         event.preventDefault();
         const okrGoalData = new FormData(event.currentTarget);
-        setOkrGoalsList([...okrGoalsList, {id: uuid(), okrName: okrGoalData.get('okrName'), okrFinishBy: okrGoalData.get('okrFinishBy'), okrDifficulty: okrGoalData.get('okrDifficulty')}])
+        setOkrGoalsList([...okrGoalsList, {name: okrGoalData.get('okrName'), finishBy: okrGoalData.get('okrFinishBy'), difficulty: okrGoalData.get('okrDifficulty'), isDone: false}])
         okrGoalNameRef.current.value = '';
         okrFinishByRef.current.value = '';
         // okrDifficultyRef.current.value = 1;

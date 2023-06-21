@@ -5,7 +5,7 @@ import Register from './Register.js';
 import Goals from './Goals.js';
 import GoalCreation from './GoalCreation.js';
 import jwt_decode from "jwt-decode";
-import { getUser, refreshToken } from '../services/api.js';
+import { getUser, getUserByEmail, refreshToken } from '../services/api.js';
 import { CircularProgress, Box } from '@mui/material';
 import { ConstructionOutlined } from '@mui/icons-material';
 
@@ -17,7 +17,10 @@ function App() {
     const currentDate = new Date();
     const jwtToken = localStorage.getItem('JWT');
     const decodedToken = jwt_decode(jwtToken);
-    getUser(decodedToken.id)
+    console.log('decoded token');
+    console.log(decodedToken);
+    console.log('decoded token sub: ' + decodedToken.sub);
+    getUserByEmail(decodedToken.sub)
       .then(user => {
         // console.log(user);
         if (decodedToken.exp * 1000 < currentDate.getTime()) { // if the token is expired
@@ -56,7 +59,7 @@ function App() {
     if(authenticatedUser === null) {
       navigate('/login');
     } else if (Object.keys(authenticatedUser).length !== 0) {
-      navigate('/goals', { state: authenticatedUser });
+      navigate('/goals');
     }
   }, [authenticatedUser])
 

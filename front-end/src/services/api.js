@@ -15,7 +15,7 @@ axiosJWT.interceptors.request.use(
             const data = await refreshToken(currentUser).then(data => data.data);
             // console.log('data after refreshing');
             // console.log(data);
-            config.headers["authorization"] = "Bearer " + data.accessToken;
+            config.headers["Authorization"] = "Bearer " + data.accessToken;
             sessionStorage.setItem('user', JSON.stringify({
                 ...currentUser,
                 accessToken: data.accessToken,
@@ -23,10 +23,10 @@ axiosJWT.interceptors.request.use(
             }));
             localStorage.setItem('JWT', data.accessToken);
         } else {
-            config.headers["authorization"] = "Bearer " + currentUser.accessToken;
+            config.headers["Authorization"] = "Bearer " + currentUser.accessToken;
         }
-        console.log('config:')
-        console.log(config);
+        // console.log('config:')
+        // console.log(config);
         return config;
     },
     (error) => {
@@ -47,7 +47,7 @@ export const loginUser = (userInfo) => {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
-    return axios.post('http://localhost:8080/login', userInfo, { headers }).then(res => res.data);
+    return axios.post('http://localhost:8080/auth/login', userInfo, { headers }).then(res => res.data).then(serverRes => serverRes.data);
 };
 
 export const createGoal = (goalInfo) => {
@@ -55,24 +55,31 @@ export const createGoal = (goalInfo) => {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
+    console.log('sending goal to backend');
+    console.log(goalInfo);
     return axiosJWT.post('http://localhost:8080/goal', goalInfo, { headers }).then(res => res.data);
 };
 
 export const getGoals = async () => {
     const currentUser = JSON.parse(sessionStorage.getItem('user'));
-    // console.log('current user from get goals');
-    // console.log(currentUser);
+    console.log('current user from get goals');
+    console.log(currentUser);
     const headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
     };
     const allGoals = await axiosJWT.get('http://localhost:8080/goals', { headers }).then(res => res.data);
-    // console.log(allGoals);
     return allGoals.filter(goal => goal.createdBy === currentUser.id);
 };
 
 export const deleteGoal = async (goalId) => {
     return axiosJWT.delete(`http://localhost:8080/goal/${goalId}`).then(res => res.data);
+}
+
+export const updateGoal = async (goalInfo) => {
+    console.log('updating goal');
+    console.log(goalInfo);
+    return axiosJWT.put('http://localhost:8080/goal', goalInfo).then(res => res.data);
 }
 
 export const getAllUsers = async (userInfo) => {
@@ -84,10 +91,14 @@ export const getAllUsers = async (userInfo) => {
     return allUsers.filter(user => user._id !== userInfo.id);
 }
 
-export const getUser = async (userId) => {
+export const getUserById = async (userId) => {
     return axios.get(`http://localhost:8080/user/${userId}`).then(res => res.data);
 }
 
+export const getUserByEmail = async (emailAddress) => {
+    return axios.get(`http://localhost:8080/user?email=${emailAddress}`).then(res => res.data).then(serverRes => serverRes.data);
+} 
+
 export const refreshToken = async (userInfo) => {
-    return axios.post('http://localhost:8080/api/refreshToken', {refreshToken: userInfo.refreshToken, id: userInfo.id});
+    return axios.post('http://localhost:8080/auth/refresh-token', {refreshToken: userInfo.refreshToken, id: userInfo.id});
 }

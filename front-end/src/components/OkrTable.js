@@ -291,7 +291,7 @@ export default function OkrTable({ okrGoalsList, setOkrGoalsList }) {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.okrName}
+                    key={row.name}
                     selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
@@ -310,10 +310,10 @@ export default function OkrTable({ okrGoalsList, setOkrGoalsList }) {
                       scope="row"
                       padding="none"
                     >
-                      {row.okrName}
+                      {row.name}
                     </TableCell>
-                    <TableCell align="left">{row.okrFinishBy}</TableCell>
-                    <TableCell align="left">{row.okrDifficulty}</TableCell>
+                    <TableCell align="left">{row.finishBy}</TableCell>
+                    <TableCell align="left">{row.difficulty}</TableCell>
                   </TableRow>
                 );
               })}

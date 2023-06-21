@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 
 const generateAccessToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "15s",
+        expiresIn: "15m",
     });
 };
   
@@ -179,6 +179,18 @@ app.delete('/goal/:id', verify, async (req, res) => {
         res.status(200).json({ status: 'ok' });
     } catch (e) {
         res.send({ status: 'error', error: e.message});
+    }
+});
+
+app.put('/goal', verify, async (req, res) => {
+    const goal = req.body;
+    // console.log('goal');
+    // console.log(goal);
+    try {
+        await Goal.updateOne({ id: goal.id}, {$set:{okrGoals: goal.okrGoals}});
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        res.send({ status: 'error', error: e.message})
     }
 });
 

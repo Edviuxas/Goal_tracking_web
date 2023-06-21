@@ -46,6 +46,10 @@ const OkrGoalSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isDone: {
+        type: Boolean,
+        required: true,
+    }
 })
 
 const GoalSchema = new mongoose.Schema({
