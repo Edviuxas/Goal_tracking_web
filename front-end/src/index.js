@@ -6,6 +6,7 @@ import Goals from './components/Goals';
 import Register from './components/Register';
 import GoalCreation from './components/GoalCreation';
 import GoalDetails from './components/GoalDetails';
+import Team from './components/Team';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -16,8 +17,9 @@ root.render(
         <Route path='/login' element={<Login/>}/>
         <Route path='/register' element={<Register />} />
         <Route path='/goals' element={<Goals/>} />
-        <Route path='/createGoal' element={<GoalCreation/>}/>
-        <Route path='/goal' element={<GoalDetails/>}/>
+        <Route path='/goal-creation' element={<GoalCreation/>}/>
+        {/* <Route path='/goal' element={<GoalDetails/>}/> */}
+        <Route path='/teams' element={<Team/>}/>
       </Routes>
     </BrowserRouter>
 );
