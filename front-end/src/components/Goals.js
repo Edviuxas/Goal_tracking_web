@@ -5,6 +5,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Add } from '@mui/icons-material';
 import { createGoal, getGoals } from '../services/api';
 import GoalCard from './GoalCard';
+import Navbar from './Navbar';
 import GoalDetailsModal from './GoalDetailsModal';
 
 function Goals() {
@@ -29,25 +30,7 @@ function Goals() {
     
     return (
         <>
-            <AppBar position='static'>
-                <Toolbar>
-                    <Link to="/goals" style={{ textDecoration: 'none', color: 'white' }}>
-                        <Typography
-                            variant='h6'
-                        >
-                            GOALS
-                        </Typography>
-                    </Link>
-                    <Link to="/teams" style={{ textDecoration: 'none', color: 'white' }}>
-                        <Typography
-                            variant='h6'
-                            marginLeft={5}
-                        >
-                            TEAMS
-                        </Typography>
-                    </Link>
-                </Toolbar>
-            </AppBar>
+            <Navbar/>
             <Box>
                 <Stack direction="row" flexWrap="wrap">
                     {goalsList.map((goal) => (
@@ -72,9 +55,7 @@ function Goals() {
                 }}
             >
                 <Fab color="primary">
-                    <Add>
-
-                    </Add>
+                    <Add/>
                 </Fab>
             </Tooltip>
             <GoalDetailsModal goalInfo={clickedGoal} modalOpen={modalOpen} setModalOpen={setModalOpen}/>
