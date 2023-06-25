@@ -130,7 +130,7 @@ function EnhancedTableToolbar(props) {
   const { numSelected, okrGoalsList, setOkrGoalsList, selected, setSelected } = props;
   const handleDeleteRows = (event) => {
     console.log(selected);
-    setOkrGoalsList(okrGoalsList.filter((okrGoal) => !selected.includes(okrGoal.id)));
+    setOkrGoalsList(okrGoalsList.filter((okrGoal) => !selected.includes(okrGoal)));
     setSelected([]);
   };
 
@@ -181,16 +181,16 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function OkrTable({ okrGoalsList, setOkrGoalsList }) {
-    React.useEffect(() => {
-        console.log('okr goals list from okr table')
-        console.log(okrGoalsList);
-    }, [okrGoalsList])
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('okrName');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  React.useEffect(() => {
+    console.log('selected');
+    console.log(selected);
+  }, [selected])
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -200,19 +200,19 @@ export default function OkrTable({ okrGoalsList, setOkrGoalsList }) {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = okrGoalsList.map((n) => n.id);
+      const newSelected = okrGoalsList.map((n) => n);
       setSelected(newSelected);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
+  const handleClick = (event, id, row) => {
+    const selectedIndex = selected.indexOf(row);
     let newSelected = [];
 
     if (selectedIndex === -1) { // if row is not selected already we add it to selected
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(selected, row);
     } else if (selectedIndex === 0) { // if we have the first row and it is already selected, we deselect it
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) { // if we have the last row and it is already selected, we deselect it
@@ -281,13 +281,13 @@ export default function OkrTable({ okrGoalsList, setOkrGoalsList }) {
             />
             <TableBody>
               {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
+                const isItemSelected = isSelected(row);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.id)}
+                    onClick={(event) => handleClick(event, row.id, row)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}

@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Modal, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Modal, Typography } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { updateGoal } from '../services/api';
 
@@ -90,24 +90,31 @@ function GoalDetailsModal({ modalOpen, setModalOpen, goalInfo }) {
                 <Box>
                     <Typography textAlign="center" variant='h6'>Okr goals</Typography>
                     <List>
-                        {goalInfo.okrGoals.map((okrGoal) => (
-                            <ListItem
-                                key={okrGoal.id}
-                                disablePadding
-                            >
-                                <ListItemButton role={undefined} onClick={handleToggle(okrGoal.id)} dense disabled={okrGoal.isDone} sx={{backgroundColor: deadlinePassed(okrGoal) && "lightpink"}}>
-                                    <ListItemIcon>
-                                        <Checkbox
-                                            edge="start"
-                                            tabIndex={-1}
-                                            checked={checked.indexOf(okrGoal.id) !== -1}
-                                            disableRipple
-                                            inputProps={{ 'aria-label': 'controlled' }}
-                                        />
-                                    </ListItemIcon>
-                                    <ListItemText primary={okrGoal.name}/>
-                                </ListItemButton>
-                            </ListItem>
+                        {goalInfo.okrGoals.map((okrGoal, idx) => (
+                            <>
+                                <ListItem
+                                    key={okrGoal.id}
+                                    disablePadding
+                                    sx={{justifyContent: "space-around"}}
+                                >
+                                    <ListItemButton role={undefined} onClick={handleToggle(okrGoal.id)} dense disabled={okrGoal.isDone} sx={{backgroundColor: deadlinePassed(okrGoal) && "lightpink"}}>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                tabIndex={-1}
+                                                checked={checked.indexOf(okrGoal.id) !== -1}
+                                                disableRipple
+                                                inputProps={{ 'aria-label': 'controlled' }}
+                                            />
+                                        </ListItemIcon>
+                                        <Box sx={{display: 'flex', width:"100%", justifyContent: 'space-between'}}>
+                                            <ListItemText primary={okrGoal.name}/>
+                                            <ListItemText primary={"Due: " + okrGoal.finishBy} sx={{flex: 'none'}}/>    
+                                        </Box>
+                                    </ListItemButton>
+                                </ListItem>
+                                {idx < goalInfo.okrGoals.length - 1 && <Divider/>}
+                            </>
                         ))}
                     </List>
                 </Box>

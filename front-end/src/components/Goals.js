@@ -1,7 +1,7 @@
 import { Box, Fab, Tooltip, Typography, Stack, AppBar, Toolbar } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Add } from '@mui/icons-material';
 import { createGoal, getGoals } from '../services/api';
 import GoalCard from './GoalCard';
@@ -31,17 +31,21 @@ function Goals() {
         <>
             <AppBar position='static'>
                 <Toolbar>
-                    <Typography
-                        variant='h6'
-                    >
-                        GOALS
-                    </Typography>
-                    <Typography
-                        variant='h6'
-                        marginLeft={5}
-                    >
-                        TEAMS
-                    </Typography>
+                    <Link to="/goals" style={{ textDecoration: 'none', color: 'white' }}>
+                        <Typography
+                            variant='h6'
+                        >
+                            GOALS
+                        </Typography>
+                    </Link>
+                    <Link to="/teams" style={{ textDecoration: 'none', color: 'white' }}>
+                        <Typography
+                            variant='h6'
+                            marginLeft={5}
+                        >
+                            TEAMS
+                        </Typography>
+                    </Link>
                 </Toolbar>
             </AppBar>
             <Box>
@@ -59,7 +63,7 @@ function Goals() {
                 </Stack>
             </Box>
             <Tooltip
-                onClick={(e) => navigate('/createGoal')}
+                onClick={(e) => navigate('/goal-creation')}
                 title="Create new goal"
                 sx={{
                     position: "fixed",
