@@ -102,3 +102,9 @@ export const getUserByEmail = async (emailAddress) => {
 export const refreshToken = async (userInfo) => {
     return axios.post('http://localhost:8080/auth/refresh-token', {refreshToken: userInfo.refreshToken, id: userInfo.id});
 }
+
+export const createTeam = async (teamInfo) => {
+    console.log('team info from api');
+    console.log(teamInfo);
+    return axiosJWT.post('http://localhost:8080/teams', teamInfo).then(res => res.data).then(serverRes => serverRes.data);
+}

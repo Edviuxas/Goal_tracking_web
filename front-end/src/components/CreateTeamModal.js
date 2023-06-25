@@ -1,11 +1,21 @@
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
+import { createTeam } from '../services/api';
 
 function CreateTeamModal({ createTeamModalOpen, setCreateTeamModalOpen }) {
+    const [teamName, setTeamName] = useState('');
 
     const handleModalClose = () => {
         setCreateTeamModalOpen(false);
         console.log('closing from modal');
+    }
+
+    const handleCreateClick = async () => {
+        const createdTeam = await createTeam({name: teamName});
+        //TODO: update user using patch
+        console.log('createdTeam');
+        console.log(createdTeam);
+        setCreateTeamModalOpen(false);
     }
 
     return (
@@ -27,10 +37,10 @@ function CreateTeamModal({ createTeamModalOpen, setCreateTeamModalOpen }) {
                 sx={{display: 'flex', flexDirection: 'column'}}
             >
                 <Typography textAlign='center' variant='h6' mb={1}>Create new team</Typography>
-                <TextField required size='small' fullWidth/>
+                <TextField onChange={(e) => setTeamName(e.target.value)} required size='small' fullWidth placeholder='Team name'/>
                 <Box
                     pt={1}
-                    sx={{ display: 'flex',  justifyContent: 'flex-end', gap: '12px' }}
+                    sx={{ display: 'flex',  justifyContent: 'center', gap: '12px' }}
                 >
                     <Button
                         onClick={handleModalClose}
@@ -39,12 +49,13 @@ function CreateTeamModal({ createTeamModalOpen, setCreateTeamModalOpen }) {
                         Cancel
                     </Button>
                     <Button
+                        onClick={handleCreateClick}
                         type='submit'
                         variant='contained'
                         justifyContent='center'
                         alignItems='center'
                     >
-                    Save
+                        Create
                     </Button>
                 </Box>
             </Box>
